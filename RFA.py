@@ -23,9 +23,29 @@ from six.moves import cPickle as pickle
 from six.moves import range
 
 
-# In[2]:
-if __name__ == "__main__":
+def run_scan(param_name=None, values=None):
+  kwargs = {param_name:None}
+  for v in values:
+    kwargs[param_name] = v
+    kwargs["resultdir"] = "results-{}-{}".format(param_name, v)
+    run_computation(**kwargs)
 
+def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_range=0.5, num_layer=3):
+
+  image_size = 28
+  batch_size = 128
+  valid_size = test_size = 10000
+  num_data_input = image_size*image_size
+  num_hidden = 1024
+  num_labels = 10
+  act_f = "relu"
+  init_f = "uniform"
+  back_init_f = "uniform"
+  weight_uni_range = 0.05
+  # back_uni_range = 0.5
+  # lr = 0.001
+  # num_layer = 3 #should be >= 3
+  # num_steps = 20001
   pickle_file = 'notMNIST.pickle'
 
   with open(pickle_file, 'rb') as f:
@@ -152,20 +172,7 @@ if __name__ == "__main__":
   # In[14]:
 
   # hyper parameter setting
-  image_size = 28
-  batch_size = 128
-  valid_size = test_size = 10000
-  num_data_input = image_size*image_size
-  num_hidden = 1024
-  num_labels = 10
-  act_f = "relu"
-  init_f = "uniform"
-  back_init_f = "uniform"
-  weight_uni_range = 0.05
-  back_uni_range = 0.5
-  lr = 0.001
-  num_layer = 3 #should be >= 3
-  num_steps = 20001
+
 
 
   # In[15]:
@@ -255,7 +262,7 @@ if __name__ == "__main__":
   # In[ ]:
 
   with tf.Session(graph=graph) as session:
-      fwriter = tf.summary.FileWriter("results", session.graph)
+      fwriter = tf.summary.FileWriter(resultdir, session.graph)
       tf.global_variables_initializer().run()
       print("Initialized")
       for step in range(num_steps):

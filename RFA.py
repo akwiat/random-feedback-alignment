@@ -27,6 +27,7 @@ def save_stuff(x, y, filename):
     # bigarray = np.column_stack((x,y))
     np.savetxt(filename+'_x', x)
     np.savetxt(filename+'_y', y)
+    print("data written to filebase: ",filename)
 
 def scan_lr():
   values = np.arange(0.005, 0.02, 0.005)
@@ -43,15 +44,15 @@ def run_scan(param_name=None, values=None):
 def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_range=0.5, num_layer=3):
   print("starting computation, resultdir: ", resultdir)
   os.mkdir(resultdir)
-  num_steps = 1001
+  # num_steps = 1001
 
 
   image_size = 28
   batch_size = 128
   valid_size = test_size = 10000
   num_data_input = image_size*image_size
-  # num_hidden = 1024
-  num_hidden = 100
+  num_hidden = 1024
+  # num_hidden = 100
   num_labels = 10
   act_f = "relu"
   init_f = "uniform"

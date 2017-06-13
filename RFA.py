@@ -30,7 +30,7 @@ def save_stuff(x, y, filename):
     print("data written to filebase: ",filename)
 
 def scan_lr():
-  values = np.arange(0.005, 0.02, 0.005)
+  values = np.arange(0.005, 0.03, 0.005)
   run_scan('lr', values)
 
 

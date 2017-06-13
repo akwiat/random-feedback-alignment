@@ -229,7 +229,7 @@ def run_computation(resultdir="results", lr=0.001, num_steps=10001, back_uni_ran
           name = "W" + str(i+1)
           Weight_list[name] = Weights(batch_size, num_hidden, num_hidden, act_f, init_f, True, back_init_f, weight_uni_range, back_uni_range)
 
-      bn = tf.contrib.layers.batch_norm(Weight_list["W0"], center=True, scale=True, is_training=True)
+      
 
       name = "W" + str(num_layer-2)
       Weight_list[name] = Weights(batch_size, num_hidden, num_labels, act_f, init_f, False, back_init_f, weight_uni_range, back_uni_range)
@@ -240,7 +240,8 @@ def run_computation(resultdir="results", lr=0.001, num_steps=10001, back_uni_ran
           name = "W"+str(i)
           if (i != num_layer - 2):
               x_train = Weight_list[name](x_train, batch_size)
-              x_train = bn(x_train, batch_size)
+              bn = tf.contrib.layers.batch_norm(x_train, batch_size, center=True, scale=True, is_training=True)
+              x_train = bn
           else:
               y_train = Weight_list[name](x_train, batch_size)
       logits = y_train
@@ -276,8 +277,8 @@ def run_computation(resultdir="results", lr=0.001, num_steps=10001, back_uni_ran
           name = "W"+str(i)
           if (i != num_layer - 2):
               x_test = Weight_list[name](x_test, test_size)
-              bn = tf.contrib.layers.batch_norm(Weight_list["W0"], test_size, center=True, scale=True, is_training=False)
-              x_test = bn(x_test, test_size)
+              bn = tf.contrib.layers.batch_norm(x_test, test_size, center=True, scale=True, is_training=False)
+              x_test = bn
           else:
               y_test = Weight_list[name](x_test, test_size)
       logits_test = y_test

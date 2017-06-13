@@ -245,10 +245,17 @@ if __name__ == "__main__":
       valid_prediction = tf.nn.softmax(logits_valid)
       test_prediction = tf.nn.softmax(logits_test)
 
+      with tf.name_scope("test_accuracy"):
+        tf.summary_scalar('test_acc', test_prediction)
+
+      merged = tf.summary.merge_all()
+      
+
 
   # In[ ]:
 
   with tf.Session(graph=graph) as session:
+      fwriter = tf.summary.FileWriter("results", session.graph)
       tf.global_variables_initializer().run()
       print("Initialized")
       for step in range(num_steps):
@@ -269,5 +276,8 @@ if __name__ == "__main__":
           print("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
           print("Validation accuracy: %.1f%%" % accuracy(
             valid_prediction.eval(), valid_labels))
+          summary, _ = session.run(merged, feed_dict=feed_dict)
+          fwriter.add_summary(summary, step)
+
       print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
 

@@ -14,6 +14,7 @@
 # GPU setting
 from __future__ import print_function
 import os
+import sys
 os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 
@@ -38,7 +39,7 @@ def run_scan(param_name=None, values=None):
     run_computation(**kwargs)
 
 def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_range=0.5, num_layer=3):
-
+  print("starting computation, resultdir: ", resultdir)
   image_size = 28
   batch_size = 128
   valid_size = test_size = 10000

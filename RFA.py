@@ -44,7 +44,7 @@ def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_ran
   print("starting computation, resultdir: ", resultdir)
   num_steps = 1001
 
-  
+
   image_size = 28
   batch_size = 128
   valid_size = test_size = 10000
@@ -276,7 +276,7 @@ def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_ran
 
   with tf.Session(graph=graph) as session:
     # fwriter = tf.summary.FileWriter(resultdir, session.graph)
-    # tf.global_variables_initializer().run()
+    tf.global_variables_initializer().run()
     outfile = open(os.path.join(resultdir, "output.txt"), "w")
     outfile.write("Initialized")
     x = []

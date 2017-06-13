@@ -37,6 +37,10 @@ def lessfeatures_scanlr():
   values = np.array([128, 256, 512])
   run_scan('num_hidden', values)
 
+def batchnorm_run():
+  values = np.arange(0.005, 0.03, 0.005)
+  run_scan('lr', values)
+
 def test_batchnorm():
   values = np.array([128])
   run_scan('num_hidden', values)
@@ -65,7 +69,8 @@ def run_computation(resultdir="results", lr=0.001, num_steps=10001, back_uni_ran
   batch_size = 128
   valid_size = test_size = 10000
   num_data_input = image_size*image_size
-  num_hidden = 1024
+  num_hidden = 128
+  # num_hidden = 1024
   # num_hidden = 100
   num_labels = 10
   act_f = "relu"

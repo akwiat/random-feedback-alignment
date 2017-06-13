@@ -258,7 +258,7 @@ def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_ran
       test_prediction = tf.nn.softmax(logits_test)
 
       with tf.name_scope("test_accuracy"):
-        tf.summary_scalar('test_acc', test_prediction)
+        tf.summary.scalar('test_acc', test_prediction)
 
       merged = tf.summary.merge_all()
       

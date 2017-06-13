@@ -33,16 +33,24 @@ def scan_lr():
   values = np.arange(0.005, 0.03, 0.005)
   run_scan('lr', values)
 
+def lessfeatures_scanlr():
+  values = np.array([128, 256, 512])
+  run_scan('num_hidden', values)
+  # kwargs = {num_hidden:}
 
-def run_scan(param_name=None, values=None):
-  kwargs = {param_name:None}
+
+def run_scan(param_name=None, values=None, **kwargs):
+  # kwargs = {param_name:None}
+  kwargs = kwargs or {}
+  kwargs[param_name] = None
   for v in values:
     kwargs[param_name] = v
     kwargs["resultdir"] = "results-%s-%f" % (param_name, v)
     kwargs["num_steps"] = 10001
     run_computation(**kwargs)
 
-def run_computation(resultdir="results", lr=0.001, num_steps=10001, back_uni_range=0.5, num_layer=3):
+def run_computation(resultdir="results", lr=0.001, num_steps=10001, back_uni_range=0.5, 
+  num_layer=3, num_hidden=1024):
   print("starting computation, resultdir: ", resultdir)
   os.mkdir(resultdir)
   # num_steps = 1001

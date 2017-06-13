@@ -27,9 +27,6 @@ def scan_lr():
   values = np.arange(0.005, 0.02, 0.005)
   run_scan('lr', values)
 
-if __name__ == "__main__":
-  fn = sys.argv[1]
-  locals()[fn]()
 
 def run_scan(param_name=None, values=None):
   kwargs = {param_name:None}
@@ -297,3 +294,7 @@ def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_ran
 
       outfile.write("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
 
+
+if __name__ == "__main__":
+  fn = sys.argv[1]
+  locals()[fn]()

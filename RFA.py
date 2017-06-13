@@ -36,6 +36,10 @@ def scan_lr():
 def lessfeatures_scanlr():
   values = np.array([128, 256, 512])
   run_scan('num_hidden', values)
+
+def test_batchnorm():
+  values = np.array([128])
+  run_scan('num_hidden', values)
   # kwargs = {num_hidden:}
 
 
@@ -45,7 +49,7 @@ def run_scan(param_name=None, values=None, **kwargs):
   kwargs[param_name] = None
   for v in values:
     kwargs[param_name] = v
-    kwargs["resultdir"] = "results-%s-%f" % (param_name, v)
+    kwargs["resultdir"] = "results-batchnorm-%s-%f" % (param_name, v)
     kwargs["num_steps"] = 10001
     run_computation(**kwargs)
 

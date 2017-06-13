@@ -37,7 +37,7 @@ def run_scan(param_name=None, values=None):
   kwargs = {param_name:None}
   for v in values:
     kwargs[param_name] = v
-    kwargs["resultdir"] = "results-%s-%d" % (param_name, v)
+    kwargs["resultdir"] = "results-%s-%f" % (param_name, v)
     run_computation(**kwargs)
 
 def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_range=0.5, num_layer=3):

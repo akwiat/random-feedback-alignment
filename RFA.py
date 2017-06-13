@@ -51,6 +51,7 @@ def run_scan(param_name=None, values=None, **kwargs):
 
 def run_computation(resultdir="results", lr=0.001, num_steps=10001, back_uni_range=0.5, 
   num_layer=3, num_hidden=1024):
+  print("config: ", "lr: ", lr, "num_hidden: ", num_hidden)
   print("starting computation, resultdir: ", resultdir)
   os.mkdir(resultdir)
   # num_steps = 1001

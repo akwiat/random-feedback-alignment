@@ -22,12 +22,19 @@ import tensorflow as tf
 from six.moves import cPickle as pickle
 from six.moves import range
 
+def scan_lr():
+  values = np.arange(0.005, 0.02, 0.005)
+  run_scan('lr', values)
+
+if __name__ == "__main__":
+  fn = sys.argv[1]
+  locals()[fn]()
 
 def run_scan(param_name=None, values=None):
   kwargs = {param_name:None}
   for v in values:
     kwargs[param_name] = v
-    kwargs["resultdir"] = "results-{}-{}".format(param_name, v)
+    kwargs["resultdir"] = "results-%s-%d" % (param_name, v)
     run_computation(**kwargs)
 
 def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_range=0.5, num_layer=3):
@@ -264,7 +271,8 @@ def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_ran
   with tf.Session(graph=graph) as session:
       fwriter = tf.summary.FileWriter(resultdir, session.graph)
       tf.global_variables_initializer().run()
-      print("Initialized")
+      outfile = open(os.path.join(resultdir, "output.txt"), "w")
+      outfile.write("Initialized")
       for step in range(num_steps):
         # Pick an offset within the training data, which has been randomized.
         # Note: we could use better randomization across epochs.
@@ -279,12 +287,12 @@ def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_ran
         l, predictions = session.run([loss, train_prediction], feed_dict=feed_dict)
         session.run(train_list, feed_dict = feed_dict)
         if (step % 500 == 0):
-          print("Minibatch loss at step %d: %f" % (step, l))
-          print("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
-          print("Validation accuracy: %.1f%%" % accuracy(
+          outfile.write("Minibatch loss at step %d: %f" % (step, l))
+          outfile.write("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
+          outfile.write("Validation accuracy: %.1f%%" % accuracy(
             valid_prediction.eval(), valid_labels))
           summary, _ = session.run(merged, feed_dict=feed_dict)
           fwriter.add_summary(summary, step)
 
-      print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
+      outfile.write("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
 

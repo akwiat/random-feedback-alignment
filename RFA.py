@@ -39,9 +39,10 @@ def run_scan(param_name=None, values=None):
   for v in values:
     kwargs[param_name] = v
     kwargs["resultdir"] = "results-%s-%f" % (param_name, v)
+    kwargs["num_steps"] = 10001
     run_computation(**kwargs)
 
-def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_range=0.5, num_layer=3):
+def run_computation(resultdir="results", lr=0.001, num_steps=10001, back_uni_range=0.5, num_layer=3):
   print("starting computation, resultdir: ", resultdir)
   os.mkdir(resultdir)
   # num_steps = 1001

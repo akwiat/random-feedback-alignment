@@ -42,6 +42,7 @@ def run_scan(param_name=None, values=None):
 
 def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_range=0.5, num_layer=3):
   print("starting computation, resultdir: ", resultdir)
+  os.mkdir(resultdir)
   num_steps = 1001
 
 

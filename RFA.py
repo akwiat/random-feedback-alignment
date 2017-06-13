@@ -49,7 +49,8 @@ def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_ran
   batch_size = 128
   valid_size = test_size = 10000
   num_data_input = image_size*image_size
-  num_hidden = 1024
+  # num_hidden = 1024
+  num_hidden = 100
   num_labels = 10
   act_f = "relu"
   init_f = "uniform"
@@ -277,7 +278,8 @@ def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_ran
   with tf.Session(graph=graph) as session:
     # fwriter = tf.summary.FileWriter(resultdir, session.graph)
     tf.global_variables_initializer().run()
-    outfile = open(os.path.join(resultdir, "output.txt"), "w")
+    outfilename = os.path.join(resultdir, "output.txt")
+    outfile = open(outfilename, "w")
     outfile.write("Initialized")
     x = []
     y = []
@@ -295,6 +297,7 @@ def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_ran
       l, predictions = session.run([loss, train_prediction], feed_dict=feed_dict)
       session.run(train_list, feed_dict = feed_dict)
       if (step % 500 == 0):
+        print("Step: ", step)
         outfile.write("Minibatch loss at step %d: %f" % (step, l))
         outfile.write("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
         outfile.write("Validation accuracy: %.1f%%" % accuracy(
@@ -306,7 +309,7 @@ def run_computation(resultdir="results", lr=0.001, num_steps=20001, back_uni_ran
         # fwriter.add_summary(summary, step)
 
     outfile.write("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
-    save_stuff(np.array(x), np.array(y), outfile)
+    save_stuff(np.array(x), np.array(y), outfilename)
 
 
 

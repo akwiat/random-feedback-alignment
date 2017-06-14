@@ -1,17 +1,5 @@
 
-# coding: utf-8
-
-# # Direct Feedback Alignment Provides Learning In Deep Neural Networks
-# 
-# Feedforwd Network implementation using direct feedback alignment for optimization.
-# Data utilities are from the source code of the udacity deep learning course.
-
-# In[1]:
-
-# These are all the modules we'll be using later. Make sure you can import them
-# before proceeding further.
-
-# GPU setting
+# From sangiy92's repo on github
 from __future__ import print_function
 import os
 import sys

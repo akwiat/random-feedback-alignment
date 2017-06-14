@@ -14,6 +14,7 @@
 # GPU setting
 from __future__ import print_function
 import os
+import sys
 os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 
@@ -22,10 +23,64 @@ import tensorflow as tf
 from six.moves import cPickle as pickle
 from six.moves import range
 
+def save_stuff(x, y, filename):
+    # bigarray = np.column_stack((x,y))
+    np.savetxt(filename+'_x', x)
+    np.savetxt(filename+'_y', y)
+    print("data written to filebase: ",filename)
 
-# In[2]:
-if __name__ == "__main__":
+def scan_lr():
+  values = np.arange(0.005, 0.03, 0.005)
+  run_scan('lr', values)
 
+def lessfeatures_scanlr():
+  values = np.array([128, 256, 512])
+  run_scan('num_hidden', values)
+
+def batchnorm_run():
+  values = np.arange(0.005, 0.03, 0.005)
+  run_scan('lr', values)
+
+def test_batchnorm():
+  values = np.array([128])
+  run_scan('num_hidden', values)
+  # kwargs = {num_hidden:}
+
+
+def run_scan(param_name=None, values=None, **kwargs):
+  # kwargs = {param_name:None}
+  kwargs = kwargs or {}
+  kwargs[param_name] = None
+  for v in values:
+    kwargs[param_name] = v
+    kwargs["resultdir"] = "results-regular-%s-%f" % (param_name, v)
+    kwargs["num_steps"] = 10001
+    run_computation(**kwargs)
+
+def run_computation(resultdir="results", lr=0.001, num_steps=10001, back_uni_range=0.5, 
+  num_layer=3, num_hidden=1024):
+  print("config: ", "lr: ", lr, "num_hidden: ", num_hidden)
+  print("starting computation, resultdir: ", resultdir)
+  os.mkdir(resultdir)
+  # num_steps = 1001
+
+
+  image_size = 28
+  batch_size = 128
+  valid_size = test_size = 10000
+  num_data_input = image_size*image_size
+  num_hidden = 128
+  # num_hidden = 1024
+  # num_hidden = 100
+  num_labels = 10
+  act_f = "relu"
+  init_f = "uniform"
+  back_init_f = "uniform"
+  weight_uni_range = 0.05
+  # back_uni_range = 0.5
+  # lr = 0.001
+  # num_layer = 3 #should be >= 3
+  # num_steps = 20001
   pickle_file = 'notMNIST.pickle'
 
   with open(pickle_file, 'rb') as f:
@@ -152,20 +207,7 @@ if __name__ == "__main__":
   # In[14]:
 
   # hyper parameter setting
-  image_size = 28
-  batch_size = 128
-  valid_size = test_size = 10000
-  num_data_input = image_size*image_size
-  num_hidden = 1024
-  num_labels = 10
-  act_f = "relu"
-  init_f = "uniform"
-  back_init_f = "uniform"
-  weight_uni_range = 0.05
-  back_uni_range = 0.5
-  lr = 0.001
-  num_layer = 3 #should be >= 3
-  num_steps = 20001
+
 
 
   # In[15]:
@@ -192,6 +234,8 @@ if __name__ == "__main__":
           name = "W" + str(i+1)
           Weight_list[name] = Weights(batch_size, num_hidden, num_hidden, act_f, init_f, True, back_init_f, weight_uni_range, back_uni_range)
 
+      
+
       name = "W" + str(num_layer-2)
       Weight_list[name] = Weights(batch_size, num_hidden, num_labels, act_f, init_f, False, back_init_f, weight_uni_range, back_uni_range)
 
@@ -201,6 +245,8 @@ if __name__ == "__main__":
           name = "W"+str(i)
           if (i != num_layer - 2):
               x_train = Weight_list[name](x_train, batch_size)
+              bn = tf.contrib.layers.batch_norm(x_train, batch_size, center=True, scale=True, is_training=True)
+              x_train = bn
           else:
               y_train = Weight_list[name](x_train, batch_size)
       logits = y_train
@@ -236,38 +282,67 @@ if __name__ == "__main__":
           name = "W"+str(i)
           if (i != num_layer - 2):
               x_test = Weight_list[name](x_test, test_size)
+              bn = tf.contrib.layers.batch_norm(x_test, test_size, center=True, scale=True, is_training=False)
+              x_test = bn
           else:
               y_test = Weight_list[name](x_test, test_size)
       logits_test = y_test
       
       # Predictions for the training, validation, and test data.
-      train_prediction = tf.nn.softmax(logits)
+      update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+      with tf.control_dependencies(update_ops):
+        train_prediction = tf.nn.softmax(logits)
+      # train_prediction = tf.nn.softmax(logits)
       valid_prediction = tf.nn.softmax(logits_valid)
       test_prediction = tf.nn.softmax(logits_test)
+
+      # with tf.name_scope("test_accuracy"):
+      #   tf.summary.scalar('test_acc', test_prediction)
+
+      # merged = tf.summary.merge_all()
+      
 
 
   # In[ ]:
 
   with tf.Session(graph=graph) as session:
-      tf.global_variables_initializer().run()
-      print("Initialized")
-      for step in range(num_steps):
-        # Pick an offset within the training data, which has been randomized.
-        # Note: we could use better randomization across epochs.
-        offset = (step * batch_size) % (train_labels.shape[0] - batch_size)
-        # Generate a minibatch.
-        batch_data = train_dataset[offset:(offset + batch_size), :]
-        batch_labels = train_labels[offset:(offset + batch_size), :]
-        # Prepare a dictionary telling the session where to feed the minibatch.
-        # The key of the dictionary is the placeholder node of the graph to be fed,
-        # and the value is the numpy array to feed to it.
-        feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels}
-        l, predictions = session.run([loss, train_prediction], feed_dict=feed_dict)
-        session.run(train_list, feed_dict = feed_dict)
-        if (step % 500 == 0):
-          print("Minibatch loss at step %d: %f" % (step, l))
-          print("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
-          print("Validation accuracy: %.1f%%" % accuracy(
-            valid_prediction.eval(), valid_labels))
-      print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
+    # fwriter = tf.summary.FileWriter(resultdir, session.graph)
+    tf.global_variables_initializer().run()
+    outfilename = os.path.join(resultdir, "output.txt")
+    outfile = open(outfilename, "w")
+    outfile.write("Initialized")
+    x = []
+    y = []
+    for step in range(num_steps):
+      # Pick an offset within the training data, which has been randomized.
+      # Note: we could use better randomization across epochs.
+      offset = (step * batch_size) % (train_labels.shape[0] - batch_size)
+      # Generate a minibatch.
+      batch_data = train_dataset[offset:(offset + batch_size), :]
+      batch_labels = train_labels[offset:(offset + batch_size), :]
+      # Prepare a dictionary telling the session where to feed the minibatch.
+      # The key of the dictionary is the placeholder node of the graph to be fed,
+      # and the value is the numpy array to feed to it.
+      feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels}
+      l, predictions = session.run([loss, train_prediction], feed_dict=feed_dict)
+      session.run(train_list, feed_dict = feed_dict)
+      if (step % 500 == 0):
+        print("Step: ", step)
+        outfile.write("Minibatch loss at step %d: %f" % (step, l))
+        outfile.write("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
+        outfile.write("Validation accuracy: %.1f%%" % accuracy(
+          valid_prediction.eval(), valid_labels))
+        test_acc = accuracy(test_prediction.eval(), test_labels)
+        x.append(step)
+        y.append(test_acc)
+        # summary, _ = session.run(merged, feed_dict=feed_dict)
+        # fwriter.add_summary(summary, step)
 
+    outfile.write("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
+    save_stuff(np.array(x), np.array(y), outfilename)
+
+
+
+if __name__ == "__main__":
+  fn = sys.argv[1]
+  locals()[fn]()

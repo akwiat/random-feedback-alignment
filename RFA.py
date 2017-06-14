@@ -53,7 +53,7 @@ def run_scan(param_name=None, values=None, **kwargs):
   kwargs[param_name] = None
   for v in values:
     kwargs[param_name] = v
-    kwargs["resultdir"] = "results-batchnorm-%s-%f" % (param_name, v)
+    kwargs["resultdir"] = "results-regular-%s-%f" % (param_name, v)
     kwargs["num_steps"] = 10001
     run_computation(**kwargs)
 
